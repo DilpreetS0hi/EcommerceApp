@@ -1,0 +1,12 @@
+.App > .container{
+    max-width: 100%;
+}
+.navbar-brand{
+    width: 15%;
+}
+.nav-link{
+  color: white !important;
+  margin-right: 1vh;
+  margin-left: 7vh;
+  font-size: 4vh;
+}
