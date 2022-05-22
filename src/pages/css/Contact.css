@@ -1,0 +1,60 @@
+.dashboard {
+    overflow: hidden;
+    display: block;
+    align-items: center;
+    justify-content: center;
+    padding-left: 5%;
+    padding-top: 5%;
+  }
+  .dashboard__container {
+    flex-direction: column;
+    text-align: center;
+    background-color: #dcdcdc;
+    position: relative;
+    padding: 30px;
+    float: right;
+    margin-right: 10vh;
+  }
+  .dashboard__btn {
+    padding: 10px;
+    font-size: 18px;
+    margin-top: 10px;
+    border: none;
+    color: white;
+    background-color: black;
+  }
+  .dashboard div {
+    margin-top: 7px;
+    font-size: 3vh;
+    font-weight: bold;
+  }
+  .products{
+    max-width: 75%;
+    float: left;
+  }
+  .prod{
+    border: 1px solid #ccc;
+    margin-right: 5%;
+    background-color: white;
+    display: inline-block;
+    position: relative;
+    text-align: center;
+  }
+  .prod>p{
+    font-size: 2vh;
+    font-weight: bold;
+  }
+  .prod>div{
+    max-width: 30vh;
+    margin-left: 2px;
+  }
+  .quantity{
+    float: right;
+    margin-right: 3px;
+  }
+  .price{
+    margin-left: 3px;
+  }
+  form{
+    width: 60vh;
+  }

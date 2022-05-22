@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useNavigate } from "react-router-dom";
-import './css/Dashboard.css';
+import './css/Cart.css';
 import { auth, db, logout } from "./firebase";
+import {Card, ListGroup, ListGroupItem, Button, Toast} from "react-bootstrap";
 import * as firestore from 'firebase/firestore';
-import { query, collection, getDocs, where } from "firebase/firestore";
+import { query, collection, getDocs, where, getDoc, doc,  setDoc } from "firebase/firestore";
 import { async } from "@firebase/util";
   function Cart() {
      const [user, loading, error] = useAuthState(auth);
      const [name, setName] = useState("");
-     const [ar, setAr] = useState([]);
+     const [total, setTotal] = useState(0);
+     const [count, setCount] = useState(0);
      const [arra, setArra] = useState([]);
+     const [show, setShow] = useState(false);
      const navigate = useNavigate();
      const fetchUserName = async () => {
        try {
@@ -23,7 +26,7 @@ import { async } from "@firebase/util";
             alert("An error occured while fetching user data");
       }
     };
-    
+  
     useEffect(() => {
       if (loading) return ;
       if (!user) return navigate("/");
@@ -33,14 +36,23 @@ import { async } from "@firebase/util";
     
     const carts = async () => {
         try{
-            firestore.getDocs(firestore.collection(db, "users/" + user?.uid + "/cart")).then((snapshot) => {
-                snapshot.forEach(function(doc){
-                    const q = query(collection(db, "users"), where("pid", "==", "2"));
-                    const doc2 = getDocs(q);
-                    console.log(doc.id);
-                    //console.log(doc2.docs[0].data());
-                    //const data = doc2.docs[0].data();
-                    //console.log(data);
+          setArra([]);
+          setTotal(0);
+          setCount(0);
+            firestore.getDocs(firestore.collection(db, "users/" + user?.uid + "/cart")).then(async (snapshot) => {
+                snapshot.forEach(async function(val){
+                    if(val.data().quantity > 0){
+                        const doc3 = await getDoc(doc(db, "products", val.id));
+                        setArra(arra => [...arra,{id:doc3.id,
+                            name:doc3.data().name,
+                            img:doc3.data().img,
+                            descr:doc3.data().descr,
+                            quantity:val.data().quantity,
+                            price:doc3.data().price
+                        }]);
+                        setTotal(total => total+doc3.data().price);
+                        setCount(count => count+val.data().quantity);
+                    }
                 })
             })
         } catch (err) {
@@ -49,15 +61,39 @@ import { async } from "@firebase/util";
         }
     };
 
+    const purchase = async () => {
+      carts();
+      firestore.getDocs(firestore.collection(db, "users/" + user?.uid + "/cart")).then(async (snapshot) => {
+        snapshot.forEach(async function(val){
+          if(val.data().quantity > 0){
+            await setDoc(doc(db, "users", user.uid, "cart",val.id), {
+              quantity: 0
+            });
+          }
+        })
+      })
+      setShow(true);
+      const timer = setTimeout(() => {
+        navigate("../Dashboard");
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+
+    const remove = async (val) => {
+      await setDoc(doc(db, "users", user.uid, "cart",val), {
+        quantity: 0
+      });
+      carts();
+    }
 
     return (
       <div className="dashboard">
         <div className="products">
-        {ar.map(v => {
+        {arra.map(v => {
             let x = 0;
             return (
               <div key={v.id + (x++)} className='prod'>
-              <p>{v.id}</p>
+              <p>{v.name}</p>
                 <img src={v.img} alt="Logo" width='250vh'/>
                 <div>{v.descr}</div>
                 <p>
@@ -66,11 +102,21 @@ import { async } from "@firebase/util";
                 <p>
                   Quantity: {v.quantity}
                 </p>
+                <Button variant="warning" key={v.id} onClick={() => remove(v.id)}>Remove</Button>
               </div>
             );
           })}
 
        </div>
+       <Toast className="d-inline-block m-1" onClose={() => setShow(false)} show={show} delay={3000} autohide>
+        <Toast.Header>
+          Purchase Completed!
+        </Toast.Header>
+        <Toast.Body>
+          You will recieve a notification
+        </Toast.Body>
+      </Toast>
+
        <div className="dashboard__container">
          
          <div>Hi! {name}</div>
@@ -79,6 +125,13 @@ import { async } from "@firebase/util";
           Logout
          </button>
        </div>
+       <Card>
+          <ListGroup className="list-group-flush">
+            <ListGroupItem>Number of Items:<span className="values">{count}</span></ListGroupItem>
+            <ListGroupItem>Total(with tax): <span className="values">{parseFloat(total*1.12).toFixed(2)}</span></ListGroupItem>
+            <Button variant="primary" onClick={purchase}>Buy</Button>
+          </ListGroup>
+        </Card>
      </div>
   );
 }

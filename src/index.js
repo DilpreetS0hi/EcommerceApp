@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Cart from './pages/Cart';
 import Register from './pages/Register';
+import Contact from './pages/Contact';
 import Navigation from './pages/Navigation';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter, Router, Routes, Route } from "react-router-dom";
@@ -19,6 +20,7 @@ export default function App() {
       <Route exact path='/' element={<Login />} />
       <Route exact path='/Dashboard' element={<Dashboard />} />
       <Route exact path='/Register' element={<Register />} />
+      <Route exact path='/Contact' element={<Contact />} />
       <Route exact path='/Cart' element={<Cart />} />
     </Routes>
     </BrowserRouter>
